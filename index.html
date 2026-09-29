@@ -100,6 +100,32 @@
       border: 1px solid #ddd;
     }
 
+    .withdraw-form {
+      display: none;
+      background: white;
+      border-radius: 18px;
+      padding: 18px;
+      margin-top: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .withdraw-form h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .withdraw-form input,
+    .withdraw-form select {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      background: white;
+    }
+
     .info {
       text-align: center;
       color: #777;
@@ -119,11 +145,15 @@
     </div>
 
     <div class="balance">
-      <div class="balance-title">Your Balance</div>
+
+      <div class="balance-title">
+        Your Balance
+      </div>
 
       <div class="balance-amount" id="balance">
         ৳0.00
       </div>
+
     </div>
 
     <div class="buttons">
@@ -137,11 +167,64 @@
 
       <button
         class="withdraw"
-        onclick="withdraw()">
+        onclick="showWithdrawForm()">
         💰 Withdraw
       </button>
 
     </div>
+
+
+    <!-- WITHDRAW FORM -->
+
+    <div
+      class="withdraw-form"
+      id="withdrawForm">
+
+      <h3>
+        💰 Withdraw Money
+      </h3>
+
+      <input
+        id="withdrawAmount"
+        type="number"
+        min="0.01"
+        step="0.01"
+        placeholder="Enter amount (৳)"
+      >
+
+      <select id="withdrawMethod">
+
+        <option value="">
+          Select payment method
+        </option>
+
+        <option value="bKash">
+          bKash
+        </option>
+
+        <option value="Nagad">
+          Nagad
+        </option>
+
+      </select>
+
+      <input
+        id="accountNumber"
+        type="tel"
+        placeholder="bKash/Nagad number"
+      >
+
+      <button
+        class="watch"
+        id="withdrawButton"
+        onclick="submitWithdrawal()">
+
+        📤 Submit Withdrawal
+
+      </button>
+
+    </div>
+
 
     <div class="info">
       Earn with MK • Telegram Mini App
@@ -159,14 +242,12 @@
     const SUPABASE_URL =
       "https://fbfusyubrqhfipqbjwus.supabase.co";
 
-    // IMPORTANT:
-    // এখানে নিজের Supabase Publishable Key বসাও
     const SUPABASE_KEY =
       "sb_publishable_sXRqHsyqoIoAspEKGLiUHQ_9UgtKDNT";
 
-
     const FUNCTION_URL =
-      SUPABASE_URL + "/functions/v1/telegram-api";
+      SUPABASE_URL +
+      "/functions/v1/telegram-api";
 
 
     // ==============================
@@ -184,14 +265,15 @@
     // TELEGRAM
     // ==============================
 
-    const tg = window.Telegram.WebApp;
+    const tg =
+      window.Telegram.WebApp;
 
     tg.ready();
     tg.expand();
 
 
     // ==============================
-    // UI
+    // BALANCE
     // ==============================
 
     let balance = 0;
@@ -199,8 +281,11 @@
 
     function updateBalance() {
 
-      document.getElementById("balance").innerText =
-        "৳" + Number(balance).toFixed(2);
+      document.getElementById(
+        "balance"
+      ).innerText =
+        "৳" +
+        Number(balance).toFixed(2);
 
     }
 
@@ -213,7 +298,9 @@
 
       try {
 
-        const initData = tg.initData;
+        const initData =
+          tg.initData;
+
 
         if (!initData) {
 
@@ -222,31 +309,46 @@
           );
 
           return false;
+
         }
 
 
-        const response = await fetch(
-          FUNCTION_URL,
-          {
-            method: "POST",
+        const response =
+          await fetch(
+            FUNCTION_URL,
+            {
+              method: "POST",
 
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_KEY
-            },
+              headers: {
+                "Content-Type":
+                  "application/json",
 
-            body: JSON.stringify({
-              action: "init",
-              initData: initData
-            })
-          }
-        );
+                "apikey":
+                  SUPABASE_KEY
+              },
+
+              body: JSON.stringify({
+
+                action:
+                  "init",
+
+                initData:
+                  initData
+
+              })
+
+            }
+          );
 
 
-        const result = await response.json();
+        const result =
+          await response.json();
 
 
-        if (!response.ok || !result.success) {
+        if (
+          !response.ok ||
+          !result.success
+        ) {
 
           console.error(result);
 
@@ -255,11 +357,15 @@
           );
 
           return false;
+
         }
 
 
         balance =
-          Number(result.user.balance || 0);
+          Number(
+            result.user.balance || 0
+          );
+
 
         updateBalance();
 
@@ -275,7 +381,9 @@
         );
 
         return false;
+
       }
+
     }
 
 
@@ -286,7 +394,9 @@
     async function watchAd() {
 
       const button =
-        document.getElementById("watchButton");
+        document.getElementById(
+          "watchButton"
+        );
 
 
       button.disabled = true;
@@ -298,7 +408,8 @@
       try {
 
         if (
-          typeof show_11920162 !== "function"
+          typeof show_11920162 !==
+          "function"
         ) {
 
           throw new Error(
@@ -308,7 +419,6 @@
         }
 
 
-        // Show Monetag rewarded ad
         await show_11920162();
 
 
@@ -316,43 +426,57 @@
           "⏳ Adding Reward...";
 
 
-        // Send reward to server
-        const response = await fetch(
-          FUNCTION_URL,
-          {
-            method: "POST",
+        const response =
+          await fetch(
+            FUNCTION_URL,
+            {
+              method: "POST",
 
-            headers: {
-              "Content-Type": "application/json",
-              "apikey": SUPABASE_KEY
-            },
+              headers: {
+                "Content-Type":
+                  "application/json",
 
-            body: JSON.stringify({
-              action: "reward",
-              initData: tg.initData
-            })
-          }
-        );
+                "apikey":
+                  SUPABASE_KEY
+              },
+
+              body: JSON.stringify({
+
+                action:
+                  "reward",
+
+                initData:
+                  tg.initData
+
+              })
+
+            }
+          );
 
 
         const result =
           await response.json();
 
 
-        if (!response.ok || !result.success) {
+        if (
+          !response.ok ||
+          !result.success
+        ) {
 
           console.error(result);
 
           throw new Error(
-            result.error || "Reward failed"
+            result.error ||
+            "Reward failed"
           );
 
         }
 
 
-        // Database balance
         balance =
-          Number(result.balance);
+          Number(
+            result.balance
+          );
 
 
         updateBalance();
@@ -371,6 +495,7 @@
           "Reward could not be added. Please try again."
         );
 
+
       } finally {
 
         button.disabled = false;
@@ -379,18 +504,238 @@
           "🎁 Watch Ad & Earn";
 
       }
+
     }
 
 
     // ==============================
-    // WITHDRAW
+    // SHOW WITHDRAW FORM
     // ==============================
 
-    function withdraw() {
+    function showWithdrawForm() {
 
-      alert(
-        "Withdrawal system will be connected next."
-      );
+      const form =
+        document.getElementById(
+          "withdrawForm"
+        );
+
+
+      if (
+        form.style.display ===
+        "block"
+      ) {
+
+        form.style.display =
+          "none";
+
+      } else {
+
+        form.style.display =
+          "block";
+
+      }
+
+    }
+
+
+    // ==============================
+    // SUBMIT WITHDRAWAL
+    // ==============================
+
+    async function submitWithdrawal() {
+
+      const amount =
+        Number(
+          document.getElementById(
+            "withdrawAmount"
+          ).value
+        );
+
+
+      const method =
+        document.getElementById(
+          "withdrawMethod"
+        ).value;
+
+
+      const accountNumber =
+        document.getElementById(
+          "accountNumber"
+        ).value.trim();
+
+
+      if (
+        !amount ||
+        amount <= 0
+      ) {
+
+        alert(
+          "Please enter a valid amount."
+        );
+
+        return;
+
+      }
+
+
+      if (
+        amount > balance
+      ) {
+
+        alert(
+          "Insufficient balance."
+        );
+
+        return;
+
+      }
+
+
+      if (!method) {
+
+        alert(
+          "Please select a payment method."
+        );
+
+        return;
+
+      }
+
+
+      if (!accountNumber) {
+
+        alert(
+          "Please enter your account number."
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById(
+          "withdrawButton"
+        );
+
+
+      button.disabled = true;
+
+      button.innerText =
+        "⏳ Submitting...";
+
+
+      try {
+
+        const response =
+          await fetch(
+            FUNCTION_URL,
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                "apikey":
+                  SUPABASE_KEY
+              },
+
+              body: JSON.stringify({
+
+                action:
+                  "withdraw",
+
+                initData:
+                  tg.initData,
+
+                amount:
+                  amount,
+
+                method:
+                  method,
+
+                accountNumber:
+                  accountNumber
+
+              })
+
+            }
+          );
+
+
+        const result =
+          await response.json();
+
+
+        if (
+          !response.ok ||
+          !result.success
+        ) {
+
+          console.error(result);
+
+          throw new Error(
+            result.error ||
+            "Withdrawal failed"
+          );
+
+        }
+
+
+        balance =
+          Number(
+            result.balance
+          );
+
+
+        updateBalance();
+
+
+        alert(
+          "Withdrawal request submitted successfully."
+        );
+
+
+        document.getElementById(
+          "withdrawAmount"
+        ).value = "";
+
+
+        document.getElementById(
+          "withdrawMethod"
+        ).value = "";
+
+
+        document.getElementById(
+          "accountNumber"
+        ).value = "";
+
+
+        document.getElementById(
+          "withdrawForm"
+        ).style.display =
+          "none";
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          error.message ||
+          "Withdrawal request failed."
+        );
+
+
+      } finally {
+
+        button.disabled = false;
+
+        button.innerText =
+          "📤 Submit Withdrawal";
+
+      }
 
     }
 
