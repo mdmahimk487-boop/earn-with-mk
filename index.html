@@ -9,8 +9,10 @@
   <!-- Telegram Mini App -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Monetag -->
-  <script src="https://libtl.com/sdk.js" data-zone="11897276" data-sdk="show_11897276"></script>
+  <!-- Monetag Rewarded Interstitial -->
+  <script src="https://libtl.com/sdk.js"
+          data-zone="11920162"
+          data-sdk="show_11920162"></script>
 
   <style>
     * {
@@ -110,12 +112,14 @@
 
     <div class="balance">
       <div class="balance-title">Your Balance</div>
-      <div class="balance-amount" id="balance">৳0.00</div>
+      <div class="balance-amount" id="balance">
+        ৳0.00
+      </div>
     </div>
 
     <div class="buttons">
 
-      <button class="watch" onclick="watchAd()">
+      <button class="watch" id="watchButton" onclick="watchAd()">
         🎁 Watch Ad & Earn
       </button>
 
@@ -140,38 +144,70 @@
     tg.expand();
 
 
-    // Demo balance
-    let balance = 0;
+    // Load saved demo balance
+    let balance = parseFloat(
+      localStorage.getItem("earn_mk_balance") || "0"
+    );
+
+    updateBalance();
 
 
-    // Watch Monetag Ad
+    function updateBalance() {
+
+      document.getElementById("balance").innerText =
+        "৳" + balance.toFixed(2);
+
+    }
+
+
+    // Rewarded Interstitial
     function watchAd() {
 
-      if (typeof show_11897276 === "function") {
+      const button = document.getElementById("watchButton");
 
-        show_11897276()
-          .then(() => {
+      button.disabled = true;
+      button.innerText = "⏳ Loading Ad...";
 
-            // Demo reward
-            balance += 0.10;
 
-            document.getElementById("balance").innerText =
-              "৳" + balance.toFixed(2);
+      if (typeof show_11920162 !== "function") {
 
-            alert("Ad completed! ৳0.10 reward added.");
+        button.disabled = false;
+        button.innerText = "🎁 Watch Ad & Earn";
 
-          })
-          .catch(() => {
+        alert("Monetag ad is still loading. Please try again.");
 
-            alert("Ad could not be shown. Please try again.");
-
-          });
-
-      } else {
-
-        alert("Ad system is loading. Please try again.");
-
+        return;
       }
+
+
+      show_11920162()
+        .then(() => {
+
+          // Demo reward
+          balance += 0.10;
+
+          localStorage.setItem(
+            "earn_mk_balance",
+            balance.toFixed(2)
+          );
+
+          updateBalance();
+
+          alert("Ad completed! ৳0.10 reward added.");
+
+        })
+        .catch(() => {
+
+          alert("The ad could not be shown. Please try again.");
+
+        })
+        .finally(() => {
+
+          button.disabled = false;
+          button.innerText = "🎁 Watch Ad & Earn";
+
+        });
+
     }
 
 
