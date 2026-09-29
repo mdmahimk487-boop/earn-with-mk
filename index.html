@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earn with MK</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      padding: 25px 10px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .header p {
+      color: #666;
+    }
+
+    .balance {
+      background: white;
+      border-radius: 18px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .balance-title {
+      color: #777;
+      font-size: 15px;
+    }
+
+    .balance-amount {
+      font-size: 35px;
+      font-weight: bold;
+      margin-top: 8px;
+    }
+
+    .buttons {
+      display: grid;
+      gap: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .watch {
+      background: #222;
+      color: white;
+    }
+
+    .withdraw {
+      background: white;
+      color: #222;
+      border: 1px solid #ddd;
+    }
+
+    .info {
+      text-align: center;
+      color: #777;
+      font-size: 13px;
+      margin-top: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header">
+      <h1>Earn with MK</h1>
+      <p>Watch ads and earn rewards</p>
+    </div>
+
+    <div class="balance">
+      <div class="balance-title">Your Balance</div>
+      <div class="balance-amount">৳0.00</div>
+    </div>
+
+    <div class="buttons">
+
+      <button class="watch" onclick="watchAd()">
+        🎁 Watch Ad & Earn
+      </button>
+
+      <button class="withdraw" onclick="withdraw()">
+        💰 Withdraw
+      </button>
+
+    </div>
+
+    <div class="info">
+      Earn with MK • Telegram Mini App
+    </div>
+
+  </div>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+
+    tg.ready();
+    tg.expand();
+
+    function watchAd() {
+      alert("Ad system will be connected later.");
+    }
+
+    function withdraw() {
+      alert("Withdrawal system will be connected later.");
+    }
+  </script>
+
+</body>
+</html>
