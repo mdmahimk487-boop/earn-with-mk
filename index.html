@@ -14,6 +14,9 @@
           data-zone="11920162"
           data-sdk="show_11920162"></script>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     * {
       box-sizing: border-box;
@@ -81,6 +84,11 @@
       cursor: pointer;
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .watch {
       background: #222;
       color: white;
@@ -112,6 +120,7 @@
 
     <div class="balance">
       <div class="balance-title">Your Balance</div>
+
       <div class="balance-amount" id="balance">
         ৳0.00
       </div>
@@ -119,11 +128,16 @@
 
     <div class="buttons">
 
-      <button class="watch" id="watchButton" onclick="watchAd()">
+      <button
+        class="watch"
+        id="watchButton"
+        onclick="watchAd()">
         🎁 Watch Ad & Earn
       </button>
 
-      <button class="withdraw" onclick="withdraw()">
+      <button
+        class="withdraw"
+        onclick="withdraw()">
         💰 Withdraw
       </button>
 
@@ -135,90 +149,257 @@
 
   </div>
 
+
   <script>
 
-    // Telegram
+    // ==============================
+    // CONFIG
+    // ==============================
+
+    const SUPABASE_URL =
+      "https://fbfusyubrqhfipqbjwus.supabase.co";
+
+    // IMPORTANT:
+    // এখানে নিজের Supabase Publishable Key বসাও
+    const SUPABASE_KEY =
+      "sb_publishable_sXRqHsyqoIoAspEKGLiUHQ_9UgtKDNT";
+
+
+    const FUNCTION_URL =
+      SUPABASE_URL + "/functions/v1/telegram-api";
+
+
+    // ==============================
+    // SUPABASE
+    // ==============================
+
+    const supabaseClient =
+      window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+      );
+
+
+    // ==============================
+    // TELEGRAM
+    // ==============================
+
     const tg = window.Telegram.WebApp;
 
     tg.ready();
     tg.expand();
 
 
-    // Load saved demo balance
-    let balance = parseFloat(
-      localStorage.getItem("earn_mk_balance") || "0"
-    );
+    // ==============================
+    // UI
+    // ==============================
 
-    updateBalance();
+    let balance = 0;
 
 
     function updateBalance() {
 
       document.getElementById("balance").innerText =
-        "৳" + balance.toFixed(2);
+        "৳" + Number(balance).toFixed(2);
 
     }
 
 
-    // Rewarded Interstitial
-    function watchAd() {
+    // ==============================
+    // INITIALIZE USER
+    // ==============================
 
-      const button = document.getElementById("watchButton");
+    async function initializeUser() {
 
-      button.disabled = true;
-      button.innerText = "⏳ Loading Ad...";
+      try {
 
+        const initData = tg.initData;
 
-      if (typeof show_11920162 !== "function") {
+        if (!initData) {
 
-        button.disabled = false;
-        button.innerText = "🎁 Watch Ad & Earn";
-
-        alert("Monetag ad is still loading. Please try again.");
-
-        return;
-      }
-
-
-      show_11920162()
-        .then(() => {
-
-          // Demo reward
-          balance += 0.10;
-
-          localStorage.setItem(
-            "earn_mk_balance",
-            balance.toFixed(2)
+          alert(
+            "Please open Earn with MK from Telegram."
           );
 
-          updateBalance();
+          return false;
+        }
 
-          alert("Ad completed! ৳0.10 reward added.");
 
-        })
-        .catch(() => {
+        const response = await fetch(
+          FUNCTION_URL,
+          {
+            method: "POST",
 
-          alert("The ad could not be shown. Please try again.");
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_KEY
+            },
 
-        })
-        .finally(() => {
+            body: JSON.stringify({
+              action: "init",
+              initData: initData
+            })
+          }
+        );
 
-          button.disabled = false;
-          button.innerText = "🎁 Watch Ad & Earn";
 
-        });
+        const result = await response.json();
 
+
+        if (!response.ok || !result.success) {
+
+          console.error(result);
+
+          alert(
+            "Could not connect to the server."
+          );
+
+          return false;
+        }
+
+
+        balance =
+          Number(result.user.balance || 0);
+
+        updateBalance();
+
+        return true;
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Connection error. Please try again."
+        );
+
+        return false;
+      }
     }
 
 
-    // Withdraw
+    // ==============================
+    // WATCH AD
+    // ==============================
+
+    async function watchAd() {
+
+      const button =
+        document.getElementById("watchButton");
+
+
+      button.disabled = true;
+
+      button.innerText =
+        "⏳ Loading Ad...";
+
+
+      try {
+
+        if (
+          typeof show_11920162 !== "function"
+        ) {
+
+          throw new Error(
+            "Monetag SDK is not ready."
+          );
+
+        }
+
+
+        // Show Monetag rewarded ad
+        await show_11920162();
+
+
+        button.innerText =
+          "⏳ Adding Reward...";
+
+
+        // Send reward to server
+        const response = await fetch(
+          FUNCTION_URL,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_KEY
+            },
+
+            body: JSON.stringify({
+              action: "reward",
+              initData: tg.initData
+            })
+          }
+        );
+
+
+        const result =
+          await response.json();
+
+
+        if (!response.ok || !result.success) {
+
+          console.error(result);
+
+          throw new Error(
+            result.error || "Reward failed"
+          );
+
+        }
+
+
+        // Database balance
+        balance =
+          Number(result.balance);
+
+
+        updateBalance();
+
+
+        alert(
+          "Ad completed! ৳0.10 reward added."
+        );
+
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "Reward could not be added. Please try again."
+        );
+
+      } finally {
+
+        button.disabled = false;
+
+        button.innerText =
+          "🎁 Watch Ad & Earn";
+
+      }
+    }
+
+
+    // ==============================
+    // WITHDRAW
+    // ==============================
+
     function withdraw() {
 
       alert(
-        "Withdrawal system will be connected later."
+        "Withdrawal system will be connected next."
       );
 
     }
+
+
+    // ==============================
+    // START APP
+    // ==============================
+
+    initializeUser();
 
   </script>
 
